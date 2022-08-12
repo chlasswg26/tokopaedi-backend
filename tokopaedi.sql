@@ -1,0 +1,45 @@
+CREATE TABLE users (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	email CHAR(25) NOT NULL,
+	password VARCHAR NOT NULL,
+	picture VARCHAR(100),
+	role TEXT NOT NULL DEFAULT 'buyer',
+	created_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+	updated_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+	CHECK(role IN ('buyer', 'seller', 'admin')),
+	UNIQUE(email, password)
+);
+
+CREATE TABLE categories (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(20) NOT NULL,
+ 	created_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+ 	updated_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+);
+
+CREATE TABLE products (
+	id SERIAL PRIMARY KEY,
+	title VARCHAR(50) NOT NULL,
+	description VARCHAR NOT NULL,
+	thumbnail VARCHAR(100) NOT NULL,
+	price BIGINT DEFAULT 0,
+	seller_id INT,
+	category_id INT,
+	created_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+	updated_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+	CONSTRAINT seller FOREIGN KEY(seller_id) REFERENCES users(id) ON DELETE CASCADE,
+	CONSTRAINT category FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE transactions (
+	id SERIAL PRIMARY KEY,
+	product_id INT,
+	amount INT NOT NULL,
+	price BIGINT NOT NULL,
+	status TEXT NOT NULL DEFAULT 'pending',
+ 	created_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+ 	updated_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+	CHECK(status IN ('pending', 'success', 'failed')),
+	CONSTRAINT product FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
+);
