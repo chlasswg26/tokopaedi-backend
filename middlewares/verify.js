@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const response = require('../helpers/response')
+const { decrypt } = require('../helpers/cryptography')
 const createErrors = require('http-errors')
 const path = require('node:path')
 require('dotenv').config({
@@ -10,15 +11,15 @@ const {
   JWT_REFRESH_SECRET_KEY,
   JWT_ALGORITHM
 } = process.env
-const { getUserModelsById } = require('../models/user')
+const { getUserByIdModels } = require('../models/user')
 
 module.exports = {
   verifyToken: (req, res, next) => {
     try {
       const token = req.headers.authorization
-      const getSignedCookie = req.signedCookies
+      const signedCookie = req.signedCookies
 
-      if (!getSignedCookie) throw new createErrors.UnavailableForLegalReasons('Session unavailable!')
+      if (!signedCookie?.token) throw new createErrors.UnavailableForLegalReasons('Session unavailable!')
 
       if (typeof token !== 'undefined') {
         const bearer = token.split(' ')
@@ -30,21 +31,15 @@ module.exports = {
           { algorithms: JWT_ALGORITHM },
           async (err, result) => {
             if (err) {
-              throw new createErrors.PreconditionFailed(err.message || err)
+              return response(res, err.status || 412, {
+                message: err.message || err
+              })
             } else {
-              const queryDatabase = `SELECT * INTO userTemp FROM users WHERE email = $1;
-ALTER TABLE userTemp DROP COLUMN password;
-SELECT * FROM userTemp;
-DROP TABLE userTemp;`
-              const { email } = result
-              const queryValues = [email]
-              const checkUser = await getUserModelsById(queryDatabase, queryValues)
+              const user = await getUserByIdModels(false, [result.email], 'email = $1')
 
-              if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
+              if (!user) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 
-              const user = checkUser
-
-              req.data = user
+              req.userData = user
 
               return next()
             }
@@ -54,22 +49,23 @@ DROP TABLE userTemp;`
         throw new createErrors.PreconditionRequired('Bearer token must be conditioned!')
       }
     } catch (error) {
-      return response(res, error.status, {
+      return response(res, error.status || 500, {
         message: error.message || error
       })
     }
   },
   verifyRefreshToken: (req, res, next) => {
     try {
-      const getSignedCookie = req.signedCookies
+      const signedCookie = req.signedCookies
 
-      if (!getSignedCookie) throw new createErrors.UnavailableForLegalReasons('Session unavailable!')
+      if (!signedCookie?.token) throw new createErrors.UnavailableForLegalReasons('Session unavailable!')
 
       const { token } = req.signedCookies
+      const decryptionTokenFromSignedCookie = decrypt(13, token)
 
       if (typeof token !== 'undefined') {
         jwt.verify(
-          token,
+          decryptionTokenFromSignedCookie,
           JWT_REFRESH_SECRET_KEY,
           { algorithms: JWT_ALGORITHM },
           async (err, result) => {
@@ -83,7 +79,7 @@ DROP TABLE userTemp;`
           }
         )
       } else {
-        throw new createErrors.PreconditionRequired('Token must be conditioned!')
+        throw new createErrors.PreconditionRequired('Refresh token must be conditioned!')
       }
     } catch (error) {
       return response(res, error.status, {

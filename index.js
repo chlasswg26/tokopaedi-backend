@@ -16,7 +16,7 @@ const {
   COOKIE_SECRET_KEY
 } = process.env
 
-const routesNavigator = require('./routes')
+const routesNavigator = require('./routes/all-routes')
 
 app.use(helmet())
 app.use(cookieParser(COOKIE_SECRET_KEY))

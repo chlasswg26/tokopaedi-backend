@@ -6,71 +6,99 @@ require('dotenv').config({
 const { NODE_ENV } = process.env
 
 module.exports = {
-  getAllProductModels: (query, values = []) => {
+  getAllProductModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM products'
+      const queryDatabaseAdditional = `SELECT * FROM products WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all product: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows)
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get all product: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows)
+          }
+        })
       })
     })
   },
-  getProductModelsById: (query, values = []) => {
+  getProductByIdModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM products WHERE id = $1'
+      const queryDatabaseAdditional = `SELECT * FROM products WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all product by id: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows[0])
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get product by id: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows[0])
+          }
+        })
       })
     })
   },
-  postProductModels: (query, values = []) => {
+  postProductModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'INSERT INTO products(name, stock, price) VALUES($1, $2, $3)'
+      const queryDatabase = query || 'INSERT INTO products(title, description, thumbnail, price, seller_id, category_id) VALUES($1, $2, $3, $4, $5, $6)'
+      const queryDatabaseAdditional = `INSERT INTO products${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on post product: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('New products created!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on post product: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('New products created!')
+          }
+        })
       })
     })
   },
-  putProductModels: (query, values = []) => {
+  putProductModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'UPDATE products SET name = $1, stock = $2, price = $3 WHERE id = $4'
+      const queryDatabase = query || 'UPDATE products SET title = $1, description = $2, thumbnail = $3, price = $4, seller_id = $5, category_id = $6 WHERE id = $7'
+      const queryDatabaseAdditional = `UPDATE products SET ${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on put product: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          if (error) {
+            done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Products updated!')
-        }
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on put product: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Products updated!')
+          }
+        })
       })
     })
   },
@@ -78,16 +106,22 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'DELETE FROM products WHERE id = $1'
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on delete product: ${errorMessage}`)
+        client.query(queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Products deleted!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on delete product: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Products deleted!')
+          }
+        })
       })
     })
   }

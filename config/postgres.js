@@ -26,7 +26,9 @@ const pool = new Pool({
 if (NODE_ENV === 'development') {
   pool.on('connect', () => console.log('Postgres connect...'))
 
-  pool.on('error', error => console.log(error.message))
+  pool.on('error', error => console.log(`Postgres error: ${error.message}`))
+
+  pool.on('remove', () => console.log('Postgres removing...'))
 
   console.log(`${pool.idleCount} clients currently idle...
 ${pool.waitingCount} clients queued requests waiting...`)

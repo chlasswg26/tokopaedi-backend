@@ -6,71 +6,99 @@ require('dotenv').config({
 const { NODE_ENV } = process.env
 
 module.exports = {
-  getAllTransactionModels: (query, values = []) => {
+  getAllTransactionModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM transactions'
+      const queryDatabaseAdditional = `SELECT * FROM transactions WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all transaction: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows)
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get all transaction: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows)
+          }
+        })
       })
     })
   },
-  getTransactionModelsById: (query, values = []) => {
+  getTransactionByIdModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM transactions WHERE id = $1'
+      const queryDatabaseAdditional = `SELECT * FROM transactions WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all transaction by id: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows[0])
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get transaction by id: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows[0])
+          }
+        })
       })
     })
   },
-  postTransactionModels: (query, values = []) => {
+  postTransactionModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'INSERT INTO transactions(name, stock, price) VALUES($1, $2, $3)'
+      const queryDatabase = query || 'INSERT INTO transactions(buyer_id, product_id, amount, price) VALUES($1, $2, $3, $4)'
+      const queryDatabaseAdditional = `INSERT INTO transactions${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on post transaction: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('New transactions created!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on post transaction: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('New transactions created!')
+          }
+        })
       })
     })
   },
-  putTransactionModels: (query, values = []) => {
+  putTransactionModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'UPDATE transactions SET name = $1, stock = $2, price = $3 WHERE id = $4'
+      const queryDatabase = query || 'UPDATE transactions SET buyer_id = $1, product_id = $2, amount = $3, price = $4 WHERE id = $5'
+      const queryDatabaseAdditional = `UPDATE transactions SET ${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on put transaction: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Transactions updated!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on put transaction: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Transactions updated!')
+          }
+        })
       })
     })
   },
@@ -78,16 +106,22 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'DELETE FROM transactions WHERE id = $1'
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on delete transaction: ${errorMessage}`)
+        client.query(queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Transactions deleted!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on delete transaction: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Transactions deleted!')
+          }
+        })
       })
     })
   }

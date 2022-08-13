@@ -1,5 +1,5 @@
 const response = require('../helpers/response')
-const { getUserModelsById } = require('../models/user')
+const { getUserByIdModels } = require('../models/user')
 const createErrors = require('http-errors')
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
       const email = req.email
       const queryDatabase = 'SELECT * FROM users WHERE email = $1'
       const queryValues = [email]
-      const checkUser = await getUserModelsById(queryDatabase, queryValues)
+      const checkUser = await getUserByIdModels(queryDatabase, queryValues)
 
       if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 
@@ -36,7 +36,7 @@ module.exports = {
       const email = req.email
       const queryDatabase = 'SELECT * FROM users WHERE email = $1'
       const queryValues = [email]
-      const checkUser = await getUserModelsById(queryDatabase, queryValues)
+      const checkUser = await getUserByIdModels(queryDatabase, queryValues)
 
       if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 
@@ -62,7 +62,7 @@ module.exports = {
       const email = req.email
       const queryDatabase = 'SELECT * FROM users WHERE email = $1'
       const queryValues = [email]
-      const checkUser = await getUserModelsById(queryDatabase, queryValues)
+      const checkUser = await getUserByIdModels(queryDatabase, queryValues)
 
       if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 

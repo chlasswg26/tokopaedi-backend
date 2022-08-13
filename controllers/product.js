@@ -1,6 +1,6 @@
 const {
   getAllProductModels,
-  getProductModelsById,
+  getProductByIdModels,
   postProductModels,
   putProductModels,
   deleteProductModels
@@ -31,7 +31,7 @@ module.exports = {
       const id = req.params.id
       const queryDatabase = 'SELECT * FROM products WHERE id = $1'
       const queryValues = [id]
-      const result = await getProductModelsById(queryDatabase, queryValues)
+      const result = await getProductByIdModels(queryDatabase, queryValues)
 
       return response(res, 200, result || {})
     } catch (error) {

@@ -6,77 +6,103 @@ require('dotenv').config({
 const { NODE_ENV } = process.env
 
 module.exports = {
-  getAllUserModels: (query, values = []) => {
+  getAllUserModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || `SELECT * INTO userTemp FROM users;
-ALTER TABLE userTemp DROP COLUMN password;
-SELECT * FROM userTemp;
-DROP TABLE userTemp;`
+      const queryDatabase = query || 'SELECT * FROM users'
+      const queryDatabaseAdditional = `SELECT * FROM users WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all user: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows)
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get all user: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows.map(value => {
+              delete value.password
+
+              return value
+            }))
+          }
+        })
       })
     })
   },
-  getUserModelsById: (query, values = []) => {
+  getUserByIdModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || `SELECT * INTO userTemp FROM users WHERE id = $1;
-ALTER TABLE userTemp DROP COLUMN password;
-SELECT * FROM userTemp;
-DROP TABLE userTemp;`
+      const queryDatabase = query || 'SELECT * FROM users WHERE id = $1'
+      const queryDatabaseAdditional = `SELECT * FROM users WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all user by id: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows[0])
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get user by id: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows[0])
+          }
+        })
       })
     })
   },
-  postUserModels: (query, values = []) => {
+  postUserModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'INSERT INTO users(name, stock, price) VALUES($1, $2, $3)'
+      const queryDatabase = query || 'INSERT INTO users(name, email, password, picture) VALUES($1, $2, $3, $4)'
+      const queryDatabaseAdditional = `INSERT INTO users${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on post user: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('New users created!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on post user: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('New users created!')
+          }
+        })
       })
     })
   },
-  putUserModels: (query, values = []) => {
+  putUserModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'UPDATE users SET name = $1, stock = $2, price = $3 WHERE id = $4'
+      const queryDatabase = query || 'UPDATE users SET name = $1, email = $2, password = $3, picture = $4, role = $5, refresh_token = $6 WHERE id = $7'
+      const queryDatabaseAdditional = `UPDATE users SET ${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on put user: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Users updated!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on put user: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Users updated!')
+          }
+        })
       })
     })
   },
@@ -84,16 +110,22 @@ DROP TABLE userTemp;`
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'DELETE FROM users WHERE id = $1'
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on delete user: ${errorMessage}`)
+        client.query(queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Users deleted!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on delete user: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Users deleted!')
+          }
+        })
       })
     })
   }

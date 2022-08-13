@@ -6,71 +6,99 @@ require('dotenv').config({
 const { NODE_ENV } = process.env
 
 module.exports = {
-  getAllCategoryModels: (query, values = []) => {
+  getAllCategoryModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM categories'
+      const queryDatabaseAdditional = `SELECT * FROM categories WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all category: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows)
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get all category: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows)
+          }
+        })
       })
     })
   },
-  getCategoryModelsById: (query, values = []) => {
+  getCategoryByIdModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM categories WHERE id = $1'
+      const queryDatabaseAdditional = `SELECT * FROM categories WHERE ${additional}`
 
-      postgres.query(queryDatabase, values, (error, result) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on get all category by id: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve(result.rows[0])
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on get category by id: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve(result.rows[0])
+          }
+        })
       })
     })
   },
-  postCategoryModels: (query, values = []) => {
+  postCategoryModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'INSERT INTO categories(name, stock, price) VALUES($1, $2, $3)'
+      const queryDatabase = query || 'INSERT INTO categories(name) VALUES($1)'
+      const queryDatabaseAdditional = `INSERT INTO categories${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on post category: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('New categories created!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on post category: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('New categories created!')
+          }
+        })
       })
     })
   },
-  putCategoryModels: (query, values = []) => {
+  putCategoryModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
-      const queryDatabase = query || 'UPDATE categories SET name = $1, stock = $2, price = $3 WHERE id = $4'
+      const queryDatabase = query || 'UPDATE categories SET name = $1 WHERE id = $2'
+      const queryDatabaseAdditional = `UPDATE categories SET ${additional}`
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on put category: ${errorMessage}`)
+        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Categories updated!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on put category: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Categories updated!')
+          }
+        })
       })
     })
   },
@@ -78,16 +106,22 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'DELETE FROM categories WHERE id = $1'
 
-      postgres.query(queryDatabase, values, (error, _) => {
-        if (error) {
-          const errorMessage = error.message
+      postgres.connect((err, client, done) => {
+        if (err) reject(err)
 
-          if (NODE_ENV === 'development') console.log(`Models error on delete category: ${errorMessage}`)
+        client.query(queryDatabase, values, (error, _) => {
+          done()
 
-          reject(errorMessage)
-        } else {
-          resolve('Categories deleted!')
-        }
+          if (error) {
+            const errorMessage = error.message
+
+            if (NODE_ENV === 'development') console.log(`Models error on delete category: ${errorMessage}`)
+
+            reject(errorMessage)
+          } else {
+            resolve('Categories deleted!')
+          }
+        })
       })
     })
   }
