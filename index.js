@@ -6,9 +6,7 @@ const favicon = require('serve-favicon')
 const cookieParser = require('cookie-parser')
 const app = express()
 const path = require('node:path')
-require('dotenv').config({
-  path: path.resolve(__dirname, './.env')
-})
+require('dotenv').config()
 const {
   NODE_ENV,
   FRONTEND_URL,

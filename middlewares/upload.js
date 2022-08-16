@@ -2,9 +2,7 @@ const multer = require('multer')
 const response = require('../helpers/response')
 const createErrors = require('http-errors')
 const path = require('node:path')
-require('dotenv').config({
-  path: path.resolve(__dirname, '../.env')
-})
+require('dotenv').config()
 const { MAX_FILE_SIZE } = process.env
 
 const multerStorage = multer({

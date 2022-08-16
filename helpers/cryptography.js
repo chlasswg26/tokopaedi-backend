@@ -1,8 +1,5 @@
 const response = require('./response')
-const path = require('node:path')
-require('dotenv').config({
-  path: path.resolve(__dirname, '../.env')
-})
+require('dotenv').config()
 const {
   ENCRYPTION_PASSWORD,
   ENCRYPTION_SALT,
@@ -24,7 +21,7 @@ module.exports = {
       digest: ENCRYPTION_DIGEST
     })
 
-    return encryptString(typeof data === 'object' ? JSON.stringify(data) : data, ENCRYPTION_PASSWORD)
+    return encryptString(typeof data === 'object' ? data : data, ENCRYPTION_PASSWORD)
   },
   decrypt: (iterationNum = 15, data = '') => {
     const { decryptString } = new StringCrypto({

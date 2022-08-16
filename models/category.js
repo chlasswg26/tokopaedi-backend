@@ -1,20 +1,17 @@
 const postgres = require('../config/postgres')
-const path = require('node:path')
-require('dotenv').config({
-  path: path.resolve(__dirname, '../.env')
-})
+require('dotenv').config()
 const { NODE_ENV } = process.env
 
 module.exports = {
   getAllCategoryModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM categories'
-      const queryDatabaseAdditional = `SELECT * FROM categories WHERE ${additional}`
+      const queryAdditionalDatabase = `SELECT * FROM categories WHERE ${additional}`
 
       postgres.connect((err, client, done) => {
         if (err) reject(err)
 
-        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+        client.query(additional ? queryAdditionalDatabase : queryDatabase, values, (error, result) => {
           done()
 
           if (error) {
@@ -33,12 +30,12 @@ module.exports = {
   getCategoryByIdModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'SELECT * FROM categories WHERE id = $1'
-      const queryDatabaseAdditional = `SELECT * FROM categories WHERE ${additional}`
+      const queryAdditionalDatabase = `SELECT * FROM categories WHERE ${additional}`
 
       postgres.connect((err, client, done) => {
         if (err) reject(err)
 
-        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, result) => {
+        client.query(additional ? queryAdditionalDatabase : queryDatabase, values, (error, result) => {
           done()
 
           if (error) {
@@ -57,12 +54,12 @@ module.exports = {
   postCategoryModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'INSERT INTO categories(name) VALUES($1)'
-      const queryDatabaseAdditional = `INSERT INTO categories${additional}`
+      const queryAdditionalDatabase = `INSERT INTO categories${additional}`
 
       postgres.connect((err, client, done) => {
         if (err) reject(err)
 
-        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+        client.query(additional ? queryAdditionalDatabase : queryDatabase, values, (error, _) => {
           done()
 
           if (error) {
@@ -81,12 +78,12 @@ module.exports = {
   putCategoryModels: (query, values = [], additional) => {
     return new Promise((resolve, reject) => {
       const queryDatabase = query || 'UPDATE categories SET name = $1 WHERE id = $2'
-      const queryDatabaseAdditional = `UPDATE categories SET ${additional}`
+      const queryAdditionalDatabase = `UPDATE categories SET ${additional}`
 
       postgres.connect((err, client, done) => {
         if (err) reject(err)
 
-        client.query(additional ? queryDatabaseAdditional : queryDatabase, values, (error, _) => {
+        client.query(additional ? queryAdditionalDatabase : queryDatabase, values, (error, _) => {
           done()
 
           if (error) {

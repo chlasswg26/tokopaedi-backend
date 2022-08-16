@@ -2,10 +2,7 @@ const jwt = require('jsonwebtoken')
 const response = require('../helpers/response')
 const { decrypt } = require('../helpers/cryptography')
 const createErrors = require('http-errors')
-const path = require('node:path')
-require('dotenv').config({
-  path: path.resolve(__dirname, '../.env')
-})
+require('dotenv').config()
 const {
   JWT_SECRET_KEY,
   JWT_REFRESH_SECRET_KEY,

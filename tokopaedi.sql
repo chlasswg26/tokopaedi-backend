@@ -37,7 +37,7 @@ CREATE TABLE transactions (
 	id SERIAL PRIMARY KEY,
 	buyer_id INT,
 	product_id INT,
-	amount INT NOT NULL,
+	quantity INT NOT NULL,
 	price BIGINT NOT NULL,
 	status TEXT NOT NULL DEFAULT 'pending',
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

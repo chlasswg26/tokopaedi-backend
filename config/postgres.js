@@ -1,8 +1,5 @@
 const { Pool } = require('pg')
-const path = require('node:path')
-require('dotenv').config({
-  path: path.resolve(__dirname, '../.env')
-})
+require('dotenv').config()
 const {
   PGHOST,
   PGUSER,
@@ -17,7 +14,7 @@ const pool = new Pool({
   host: PGHOST,
   database: PGDATABASE,
   password: PGPASSWORD,
-  port: Number(PGPORT),
+  port: parseInt(PGPORT),
   connectionTimeoutMillis: 50000,
   idleTimeoutMillis: 60000,
   allowExitOnIdle: true

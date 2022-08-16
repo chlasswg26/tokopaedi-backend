@@ -18,7 +18,8 @@ Route
     check('email').escape().trim().notEmpty().withMessage('E-mail Can\'t be empty').bail().isEmail().withMessage('E-mail bad format'),
     check('password').escape().trim().notEmpty().withMessage('Password Can\'t be empty').bail().isLength({
       min: 8
-    }).withMessage('Password too short, min 8 character')
+    }).withMessage('Password too short, min 8 character'),
+    check('role').escape().trim().isIn(['buyer', 'seller', 'admin']).withMessage('Invalid role!')
   ]), registerControllers)
   .post('/login', validate([
     check('email').escape().trim().notEmpty().withMessage('E-mail Can\'t be empty').bail().isEmail().withMessage('E-mail bad format'),

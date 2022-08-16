@@ -5,10 +5,10 @@ const createErrors = require('http-errors')
 module.exports = {
   grantedAll: async (req, res, next) => {
     try {
-      const email = req.email
+      const email = req.userData.email
       const queryDatabase = 'SELECT * FROM users WHERE email = $1'
-      const queryValues = [email]
-      const checkUser = await getUserByIdModels(queryDatabase, queryValues)
+      const queryValueDatabase = [email]
+      const checkUser = await getUserByIdModels(queryDatabase, queryValueDatabase)
 
       if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 
@@ -33,10 +33,10 @@ module.exports = {
   },
   grantedSellerAndAdmin: async (req, res, next) => {
     try {
-      const email = req.email
+      const email = req.userData.email
       const queryDatabase = 'SELECT * FROM users WHERE email = $1'
-      const queryValues = [email]
-      const checkUser = await getUserByIdModels(queryDatabase, queryValues)
+      const queryValueDatabase = [email]
+      const checkUser = await getUserByIdModels(queryDatabase, queryValueDatabase)
 
       if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 
@@ -59,10 +59,10 @@ module.exports = {
   },
   grantedOnlyAdmin: async (req, res, next) => {
     try {
-      const email = req.email
+      const email = req.userData.email
       const queryDatabase = 'SELECT * FROM users WHERE email = $1'
-      const queryValues = [email]
-      const checkUser = await getUserByIdModels(queryDatabase, queryValues)
+      const queryValueDatabase = [email]
+      const checkUser = await getUserByIdModels(queryDatabase, queryValueDatabase)
 
       if (!checkUser) throw new createErrors.Unauthorized('Access denied, account unregistered!')
 
