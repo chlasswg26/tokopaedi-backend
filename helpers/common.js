@@ -17,5 +17,20 @@ module.exports = {
     return Object.keys(body).map(function (key) {
       return body[key]
     })
+  },
+  mappingKey: (object = {}) => {
+    return Object.keys(object)
+      .map(key => `${key}${object[key]}`)
+      .join('')
+  },
+  random: function (length) {
+    let result = ''
+    const characters = '0123456789'
+    const charactersLength = characters.length
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    }
+
+    return result
   }
 }

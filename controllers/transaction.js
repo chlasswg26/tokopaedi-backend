@@ -7,7 +7,7 @@ const {
 } = require('../models/transaction')
 const response = require('../helpers/response')
 const createErrors = require('http-errors')
-const { queryWithKey, queryWithValue } = require('../helpers/database')
+const { queryWithKey, queryWithValue } = require('../helpers/common')
 const { decrypt } = require('../helpers/cryptography')
 const { getUserByIdModels } = require('../models/user')
 

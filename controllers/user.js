@@ -11,7 +11,7 @@ const argon2 = require('argon2')
 const cloudinary = require('cloudinary')
 const { getAllProductModels } = require('../models/product')
 const { getAllTransactionModels } = require('../models/transaction')
-const { queryWithKey, queryWithValue } = require('../helpers/database')
+const { queryWithKey, queryWithValue } = require('../helpers/common')
 
 module.exports = {
   getAllUserControllers: async (req, res) => {
@@ -263,6 +263,11 @@ module.exports = {
       const user = await getUserByIdModels(false, [params.id], 'id = $1')
 
       if (!user) throw new createErrors.ExpectationFailed('Unregistered account!')
+
+      if (data?.password) {
+        const hashPassword = await argon2.hash(data.password, { type: argon2.argon2id })
+        data.password = hashPassword
+      }
 
       if (file.length) {
         cloudinary.v2.config({ secure: true })

@@ -8,7 +8,7 @@ const { MAX_FILE_SIZE } = process.env
 const multerStorage = multer({
   storage: multer.diskStorage({}),
   fileFilter: (_req, file, cb) => {
-    const filetypes = /jpg|jpeg|png|svg|gif$i/
+    const filetypes = /jpg|jpeg|png|svg|gif|webp$i/
     const extname = filetypes.test(
       path.extname(file.originalname).toLowerCase()
     )

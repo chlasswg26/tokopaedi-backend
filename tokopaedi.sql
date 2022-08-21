@@ -6,6 +6,7 @@ CREATE TABLE users (
 	picture VARCHAR(100),
 	role TEXT NOT NULL DEFAULT 'buyer',
 	refresh_token TEXT DEFAULT '',
+	verification_code TEXT DEFAULT '',
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	CHECK(role IN ('buyer', 'seller', 'admin')),

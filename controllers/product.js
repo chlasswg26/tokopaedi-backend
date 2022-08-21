@@ -8,9 +8,13 @@ const {
 const response = require('../helpers/response')
 const createErrors = require('http-errors')
 const cloudinary = require('cloudinary')
-const { queryWithKey, queryWithValue } = require('../helpers/database')
+const { queryWithKey, queryWithValue, mappingKey } = require('../helpers/common')
 const { decrypt } = require('../helpers/cryptography')
 const { getUserByIdModels } = require('../models/user')
+const setter = require('../helpers/setter')
+const redisClient = require('../config/redis')
+require('dotenv').config()
+const { REDIS_CACHE_LIFE } = process.env
 
 module.exports = {
   getAllProductControllers: async (req, res) => {
@@ -98,6 +102,26 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
         }
       })
 
+      const {
+        redisKey,
+        redisData,
+        cacheLife
+      } = {
+        redisKey: `product:${mappingKey(req.query)}`,
+        redisData: {
+          data: result ? products : [],
+          pagination
+        },
+        cacheLife: REDIS_CACHE_LIFE
+      }
+
+      await setter(
+        redisKey,
+        redisData,
+        cacheLife,
+        res
+      )
+
       return response(res, 200, result ? products : [], pagination)
     } catch (error) {
       return response(res, error.status || 500, {
@@ -132,6 +156,23 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       delete product?.category_id
       delete product?.seller_id
       delete product?.seller_picture
+
+      const {
+        redisKey,
+        redisData,
+        cacheLife
+      } = {
+        redisKey: `product/${id}`,
+        redisData: result ? product : {},
+        cacheLife: REDIS_CACHE_LIFE
+      }
+
+      await setter(
+        redisKey,
+        redisData,
+        cacheLife,
+        res
+      )
 
       return response(res, 200, result ? product : {})
     } catch (error) {
@@ -209,6 +250,28 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       const queryDatabase = queryWithKey(id, 'UPDATE products', 'SET', data, prefix)
       const queryValueDatabase = queryWithValue(data)
       const result = await putProductModels(queryDatabase, queryValueDatabase)
+
+      const product = await getProductByIdModels(false, [id])
+      const getCacheProductById = await redisClient.get(`product/${product.id}`)
+
+      if ((getCacheProductById)) {
+        const {
+          redisKey,
+          redisData,
+          cacheLife
+        } = {
+          redisKey: `product/${product?.id}`,
+          redisData: result ? product : {},
+          cacheLife: REDIS_CACHE_LIFE
+        }
+
+        await setter(
+          redisKey,
+          redisData,
+          cacheLife,
+          res
+        )
+      }
 
       return response(res, 200, result)
     } catch (error) {
