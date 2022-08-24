@@ -222,11 +222,9 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       const params = req.params
       const paramsLength = Object.keys(params).length
       const data = req.body
-      const bodyLength = Object.keys(data).length
       const file = req.files?.thumbnail || {}
 
       if (!paramsLength) throw new createErrors.BadRequest('Request parameters empty!')
-      if (!bodyLength) throw new createErrors.BadRequest('Request body empty!')
 
       if (file.length) {
         cloudinary.v2.config({ secure: true })

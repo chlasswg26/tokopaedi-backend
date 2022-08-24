@@ -233,6 +233,7 @@ module.exports = {
       })
 
       delete user.refresh_token
+      delete user?.verification_code
 
       const users = {
         ...user,
@@ -259,6 +260,8 @@ module.exports = {
       if (!user) throw new createErrors.ExpectationFailed('Unregistered account!')
 
       delete user.password
+      delete user.refresh_token
+      delete user.verification_code
 
       const dataToSign = { email: user.email }
       const accessToken = jwt.sign(dataToSign, JWT_SECRET_KEY, {

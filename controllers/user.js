@@ -72,6 +72,7 @@ module.exports = {
 
       const users = result.map(value => {
         delete value.refresh_token
+        delete value.verification_code
 
         return value
       })
@@ -98,6 +99,7 @@ module.exports = {
 
       delete result.password
       delete result.refresh_token
+      delete result.verification_code
 
       const products = userProducts.map(value => {
         const categoryId = value?.category_id
@@ -254,11 +256,9 @@ module.exports = {
       const params = req.params
       const paramsLength = Object.keys(params).length
       const data = req.body
-      const bodyLength = Object.keys(data).length
       const file = req.files?.thumbnail || {}
 
       if (!paramsLength) throw new createErrors.BadRequest('Request parameters empty!')
-      if (!bodyLength) throw new createErrors.BadRequest('Request body empty!')
 
       const user = await getUserByIdModels(false, [params.id], 'id = $1')
 

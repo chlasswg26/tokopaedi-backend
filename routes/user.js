@@ -32,7 +32,7 @@ Route
     check('role').escape().trim().isIn(['buyer', 'seller', 'admin']).withMessage('Invalid role!')
   ]), verifyToken, grantedOnlyAdmin, postUserControllers)
   .put('/:id', multerHandler, validate([
-    param('id').escape().trim().notEmpty().withMessage('User ID can\'t be empty').bail().isNumeric().withMessage('User ID must be numeric').bail().toInt(), check('name').escape().trim().notEmpty().withMessage('User name can\'t be empty'),
+    param('id').escape().trim().notEmpty().withMessage('User ID can\'t be empty').bail().isNumeric().withMessage('User ID must be numeric').bail().toInt(),
     check('name').optional({
       nullable: true,
       checkFalsy: true

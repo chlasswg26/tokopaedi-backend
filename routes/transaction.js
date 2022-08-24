@@ -27,7 +27,7 @@ Route
     check('quantity').escape().trim().notEmpty().withMessage('Transaction quantity can\'t be empty').bail().isNumeric().withMessage('Transaction quantity must be numeric').bail().isLength({
       min: 1
     }).withMessage('Transaction quantity cannot reduce below 1').toInt(),
-    check('price').escape().trim().notEmpty().withMessage('Price can\'t be empty').bail().isNumeric().withMessage('Price must be numeric').bail().toFloat()
+    check('price').escape().trim().notEmpty().withMessage('Price can\'t be empty').bail().isNumeric().withMessage('Price must be numeric').bail().toInt()
   ]), verifyToken, grantedAll, postTransactionControllers)
   .put('/:id', validate([
     param('id').escape().trim().notEmpty().withMessage('Transaction ID can\'t be empty').bail().isNumeric().withMessage('Transaction ID must be numeric').bail().toInt(),
@@ -48,7 +48,7 @@ Route
     check('price').optional({
       nullable: true,
       checkFalsy: true
-    }).escape().trim().notEmpty().withMessage('Price can\'t be empty').bail().isNumeric().withMessage('Price must be numeric').bail().toFloat()
+    }).escape().trim().notEmpty().withMessage('Price can\'t be empty').bail().isNumeric().withMessage('Price must be numeric').bail().toInt()
   ]), verifyToken, grantedSellerAndAdmin, putTransactionControllers)
 
 module.exports = Route
