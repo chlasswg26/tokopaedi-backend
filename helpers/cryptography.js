@@ -1,4 +1,3 @@
-const response = require('./response')
 require('dotenv').config()
 const {
   ENCRYPTION_PASSWORD,
@@ -10,6 +9,7 @@ const crypto = require('node:crypto')
 const algorithm = 'aes-128-cbc'
 const salt = 'foobar'
 const hash = crypto.createHash('sha1')
+const createErrors = require('http-errors')
 
 hash.update(salt)
 
@@ -18,20 +18,19 @@ crypto.createHash('sha256').update(String('cokers')).digest('base64').substr(0, 
 const iv = crypto.randomBytes(16)
 
 module.exports = {
-  encrypt: (iterationNum = 15, data, res) => {
-    if (typeof data === 'function') {
-      return response(res, 424, {
-        message: 'Type of function is not supported!'
+  encrypt: async (iterationNum = 15, data) => {
+    return new Promise((resolve, reject) => {
+      if (typeof data === 'function') reject(new createErrors.FailedDependency('Type of function is not supported!'))
+
+      const { encryptString } = new StringCrypto({
+        salt: ENCRYPTION_SALT,
+        iterations: iterationNum,
+        digest: ENCRYPTION_DIGEST
       })
-    }
+      const encryptedData = encryptString(typeof data === 'object' ? data : data, ENCRYPTION_PASSWORD)
 
-    const { encryptString } = new StringCrypto({
-      salt: ENCRYPTION_SALT,
-      iterations: iterationNum,
-      digest: ENCRYPTION_DIGEST
+      resolve(encryptedData)
     })
-
-    return encryptString(typeof data === 'object' ? data : data, ENCRYPTION_PASSWORD)
   },
   decrypt: (iterationNum = 15, data = '') => {
     const { decryptString } = new StringCrypto({

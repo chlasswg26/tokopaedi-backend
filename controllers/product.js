@@ -118,8 +118,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       await setter(
         redisKey,
         redisData,
-        cacheLife,
-        res
+        cacheLife
       )
 
       return response(res, 200, result ? products : [], pagination)
@@ -170,8 +169,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       await setter(
         redisKey,
         redisData,
-        cacheLife,
-        res
+        cacheLife
       )
 
       return response(res, 200, result ? product : {})
@@ -254,7 +252,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       const product = await getProductByIdModels(false, [id])
       const getCacheProductById = await redisClient.get(`product/${product.id}`)
 
-      if ((getCacheProductById)) {
+      if (getCacheProductById) {
         const {
           redisKey,
           redisData,
@@ -268,8 +266,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
         await setter(
           redisKey,
           redisData,
-          cacheLife,
-          res
+          cacheLife
         )
       }
 
