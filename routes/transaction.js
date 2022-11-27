@@ -22,7 +22,6 @@ Route
     param('id').escape().trim().notEmpty().withMessage('Transaction ID can\'t be empty').bail().isNumeric().withMessage('Transaction ID must be numeric').bail().toInt()
   ]), verifyToken, grantedAll, getTransactionControllersById)
   .post('/', validate([
-    check('buyer_id').escape().trim().notEmpty().withMessage('Buyer ID\'s can\'t be empty').bail().isNumeric().withMessage('Buyer ID\'s must be numeric').bail().toInt(),
     check('product_id').escape().trim().notEmpty().withMessage('Product ID\'s can\'t be empty').bail().isNumeric().withMessage('Product ID\'s must be numeric').bail().toInt(),
     check('quantity').escape().trim().notEmpty().withMessage('Transaction quantity can\'t be empty').bail().isNumeric().withMessage('Transaction quantity must be numeric').bail().isLength({
       min: 1
@@ -31,10 +30,6 @@ Route
   ]), verifyToken, grantedAll, postTransactionControllers)
   .put('/:id', validate([
     param('id').escape().trim().notEmpty().withMessage('Transaction ID can\'t be empty').bail().isNumeric().withMessage('Transaction ID must be numeric').bail().toInt(),
-    check('buyer_id').optional({
-      nullable: true,
-      checkFalsy: true
-    }).escape().trim().notEmpty().withMessage('Buyer ID\'s can\'t be empty').bail().isNumeric().withMessage('Buyer ID\'s must be numeric').bail().toInt(),
     check('product_id').optional({
       nullable: true,
       checkFalsy: true

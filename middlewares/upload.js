@@ -29,7 +29,7 @@ module.exports = {
   multerHandler: (req, res, next) => {
     const upload = multerStorage.fields([
       {
-        name: 'thumbnail',
+        name: 'picture',
         maxCount: 1
       }
     ])

@@ -20,6 +20,7 @@ module.exports = {
   getAllProductControllers: async (req, res) => {
     try {
       const queryParams = req.query
+      const params = req.params
       let queryDatabase = ''
       let queryAdditionalDatabase = ''
       let result = ''
@@ -27,7 +28,9 @@ module.exports = {
       let totalRows = 0
 
       if (!queryParams) {
-        result = await getAllProductModels()
+        result = params?.store
+          ? await getAllProductModels(false, [req.userData?.id], 'products.seller_id = $1')
+          : await getAllProductModels()
 
         totalRows = result
       } else {
@@ -39,13 +42,28 @@ ORDER BY ${queryParams?.orderBy ? `products.${queryParams?.orderBy}` : 'products
 
           queryAdditionalDatabase = `${queryAdditionalDatabase} LIMIT ${parseInt(queryParams?.limit) || 'NULL'} OFFSET ${Math.max(((parseInt(queryParams?.limit) || 10) * (parseInt(queryParams?.page) || 0)) - (parseInt(queryParams?.limit) || 10), 0)}`
 
-          result = await getAllProductModels(false, false, queryAdditionalDatabase)
-          totalRows = await getAllProductModels(false, false, queryForCountRows)
+          result = params?.store ? await getAllProductModels(false, [req.userData?.id], `products.seller_id = $1 ${queryAdditionalDatabase}`) : await getAllProductModels(false, false, queryAdditionalDatabase)
+          totalRows = params?.store ? await getAllProductModels(false, [req.userData?.id], `products.seller_id = $1 ${queryForCountRows}`) : await getAllProductModels(false, false, queryForCountRows)
         } else {
-          queryDatabase = `SELECT products.id, products.title, products.description, products.thumbnail, products.price,
+          queryDatabase = params?.store
+            ? `SELECT products.id, products.title, products.description, products.thumbnail, products.price,
 products.seller_id, users.name AS seller, products.category_id AS category_id, categories.name AS category,
 products.created_at, products.updated_at FROM products LEFT JOIN users ON products.seller_id = users.id
-LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryParams?.orderBy ? `products.${queryParams?.orderBy}` : 'products.id'} ${queryParams?.sortBy || 'DESC'}`
+LEFT JOIN categories ON products.category_id = categories.id WHERE products.seller_id = ${
+                req.userData?.id
+              } ORDER BY ${
+                queryParams?.orderBy
+                  ? `products.${queryParams?.orderBy}`
+                  : 'products.id'
+              } ${queryParams?.sortBy || 'DESC'}`
+            : `SELECT products.id, products.title, products.description, products.thumbnail, products.price,
+products.seller_id, users.name AS seller, products.category_id AS category_id, categories.name AS category,
+products.created_at, products.updated_at FROM products LEFT JOIN users ON products.seller_id = users.id
+LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${
+                queryParams?.orderBy
+                  ? `products.${queryParams?.orderBy}`
+                  : 'products.id'
+              } ${queryParams?.sortBy || 'DESC'}`
 
           queryForCountRows = queryDatabase
 
@@ -102,24 +120,18 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
         }
       })
 
-      const {
-        redisKey,
-        redisData,
-        cacheLife
-      } = {
-        redisKey: `product:${mappingKey(req.query)}`,
-        redisData: {
-          data: result ? products : [],
-          pagination
-        },
-        cacheLife: REDIS_CACHE_LIFE
-      }
+      if (!params?.store) {
+        const { redisKey, redisData, cacheLife } = {
+          redisKey: `product:${mappingKey(req.query)}`,
+          redisData: {
+            data: result ? products : [],
+            pagination
+          },
+          cacheLife: REDIS_CACHE_LIFE
+        }
 
-      await setter(
-        redisKey,
-        redisData,
-        cacheLife
-      )
+        await setter(redisKey, redisData, cacheLife)
+      }
 
       return response(res, 200, result ? products : [], pagination)
     } catch (error) {
@@ -183,7 +195,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
     try {
       const data = req.body
       const bodyLength = Object.keys(data).length
-      const file = req.files?.thumbnail || {}
+      const file = req.files?.picture || {}
 
       if (!bodyLength) throw new createErrors.BadRequest('Request body empty!')
 
@@ -204,7 +216,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
         data.description,
         data.thumbnail,
         data.price,
-        data.seller_id,
+        req.userData?.id,
         data.category_id
       ]
 
@@ -222,7 +234,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       const params = req.params
       const paramsLength = Object.keys(params).length
       const data = req.body
-      const file = req.files?.thumbnail || {}
+      const file = req.files?.picture || {}
 
       if (!paramsLength) throw new createErrors.BadRequest('Request parameters empty!')
 
@@ -286,7 +298,7 @@ LEFT JOIN categories ON products.category_id = categories.id ORDER BY ${queryPar
       const refreshToken = req.signedCookies?.token
       const decryptionTokenFromSignedCookie = decrypt(13, refreshToken)
       const user = await getUserByIdModels(false, [req.userData?.email, decryptionTokenFromSignedCookie], 'email = $1 AND refresh_token = $2')
-      const queryDatabase = req.userData?.role === 'admin' ? 'DELETE FROM products WHERE id = $1' : 'DELETE FROM products WHERE id = $1 AND buyer_id = $2'
+      const queryDatabase = req.userData?.role === 'admin' ? 'DELETE FROM products WHERE id = $1' : 'DELETE FROM products WHERE id = $1 AND seller_id = $2'
       const queryValueDatabase = req.userData?.role === 'admin' ? [id] : [id, user?.id]
       const result = await deleteProductModels(queryDatabase, queryValueDatabase)
 

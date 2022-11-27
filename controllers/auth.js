@@ -11,7 +11,8 @@ const {
   JWT_REFRESH_SECRET_KEY,
   JWT_REFRESH_TOKEN_LIFE,
   JWT_ALGORITHM,
-  NODE_ENV
+  NODE_ENV,
+  FRONTEND_URL
 } = process.env
 const { encrypt, legacyEncrypt, legacyDecrypt } = require('../helpers/cryptography')
 const { getAllProductModels } = require('../models/product')
@@ -100,7 +101,8 @@ module.exports = {
         verificationTemplate(req)
       )
 
-      return response(res, 200, result)
+      res.writeHead(302, { Location: `${FRONTEND_URL}/auth/signin?msg=ok` })
+      res.end()
     } catch (error) {
       return response(res, error.status || 500, {
         message: error.message || error
@@ -141,7 +143,7 @@ module.exports = {
         maxAge: maxAgeCookie,
         expires: maxAgeCookie + Date.now(),
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: 'none',
         secure: NODE_ENV === 'production',
         signed: true
       })

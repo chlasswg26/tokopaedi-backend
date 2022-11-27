@@ -16,7 +16,7 @@ module.exports = {
       const token = req.headers.authorization
       const signedCookie = req.signedCookies
 
-      if (!signedCookie?.token) throw new createErrors.UnavailableForLegalReasons('Session unavailable!')
+      if (!signedCookie?.token) throw new createErrors.UnavailableForLegalReasons('Session unavailable')
 
       if (typeof token !== 'undefined') {
         const bearer = token.split(' ')
@@ -55,7 +55,7 @@ module.exports = {
     try {
       const signedCookie = req.signedCookies
 
-      if (!signedCookie?.token) throw new createErrors.UnavailableForLegalReasons('Session unavailable!')
+      if (!signedCookie?.token) throw new createErrors.UnavailableForLegalReasons('Session unavailable')
 
       const { token } = req.signedCookies
       const decryptionTokenFromSignedCookie = decrypt(13, token)

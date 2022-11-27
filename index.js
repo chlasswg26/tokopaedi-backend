@@ -17,6 +17,7 @@ const {
 
 const routesNavigator = require('./routes/all-routes')
 
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
 app.use(helmet())
 app.use(xss())
 app.use(cookieParser(COOKIE_SECRET_KEY))
@@ -27,10 +28,10 @@ app.use(express.urlencoded({
 }))
 app.use(express.json())
 app.use(cors({
-  origin: NODE_ENV === 'development' ? '*' : FRONTEND_URL,
+  origin: FRONTEND_URL,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'PUT', 'POST', 'DELETE'],
-  credentials: NODE_ENV === 'production'
+  credentials: true
 }))
 app.use(morgan('dev'))
 

@@ -198,7 +198,7 @@ module.exports = {
       const data = req.body
       const bodyLength = Object.keys(data).length
       const user = await getUserByIdModels(false, [data.email], 'email = $1')
-      const file = req.files?.thumbnail || {}
+      const file = req.files?.picture || {}
       let queryAdditionalDatabase = ''
       let queryValueDatabase = ''
       let result = ''
@@ -256,7 +256,7 @@ module.exports = {
       const params = req.params
       const paramsLength = Object.keys(params).length
       const data = req.body
-      const file = req.files?.thumbnail || {}
+      const file = req.files?.picture || {}
 
       if (!paramsLength) throw new createErrors.BadRequest('Request parameters empty!')
 

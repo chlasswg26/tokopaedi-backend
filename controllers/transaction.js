@@ -18,13 +18,11 @@ module.exports = {
       let queryDatabase = ''
       let queryAdditionalDatabase = ''
       let result = ''
-      const refreshToken = req.signedCookies?.token
-      const decryptionTokenFromSignedCookie = decrypt(13, refreshToken)
       let queryForCountRows = ''
       let totalRows = 0
 
       if (!queryParams) {
-        const queryAdditionalDatabase = `D.id = ${req.userData?.id} AND D.refresh_token = ${decryptionTokenFromSignedCookie}`
+        const queryAdditionalDatabase = `A.buyer_id = ${req.userData?.id}`
 
         result = req.userData?.role === 'admin' ? await getAllTransactionModels() : await getAllTransactionModels(false, false, queryAdditionalDatabase)
 
@@ -33,7 +31,7 @@ module.exports = {
         if (queryParams?.search) {
           queryAdditionalDatabase = `A.status LIKE '%${queryParams.search}%' OR B.name LIKE '%${queryParams.search}%' OR C.title LIKE '%${queryParams.search}%'
 OR C.description LIKE '%${queryParams.search}%' OR D.name LIKE '%${queryParams.search}%' OR E.name LIKE '%${queryParams.search}%'
-${req.userData?.role === 'admin' ? '' : `WHERE D.id = ${req.userData?.id} AND D.refresh_token = ${decryptionTokenFromSignedCookie}`} ORDER BY ${queryParams?.orderBy ? `A.${queryParams?.orderBy}` : 'A.id'} ${queryParams?.sortBy || 'DESC'}`
+${req.userData?.role === 'admin' ? '' : `WHERE D.id = ${req.userData?.id}`} ORDER BY ${queryParams?.orderBy ? `A.${queryParams?.orderBy}` : 'A.id'} ${queryParams?.sortBy || 'DESC'}`
 
           queryForCountRows = queryAdditionalDatabase
 
@@ -55,7 +53,13 @@ ON C.id = A.product_id
 INNER JOIN users AS D
 ON D.id = C.seller_id
 INNER JOIN categories AS E
-ON E.id = C.category_id ${req.userData?.role === 'admin' ? '' : `WHERE D.id = ${req.userData?.id} AND D.refresh_token = ${decryptionTokenFromSignedCookie}`} ORDER BY ${queryParams?.orderBy ? `A.${queryParams?.orderBy}` : 'A.id'} ${queryParams?.sortBy || 'DESC'}`
+ON E.id = C.category_id ${
+            req.userData?.role === 'admin'
+              ? ''
+              : `WHERE A.buyer_id = ${req.userData?.id}`
+          } ORDER BY ${
+            queryParams?.orderBy ? `A.${queryParams?.orderBy}` : 'A.id'
+          } ${queryParams?.sortBy || 'DESC'}`
 
           queryForCountRows = queryDatabase
 
@@ -218,7 +222,7 @@ ON E.id = C.category_id ${req.userData?.role === 'admin' ? '' : `WHERE D.id = ${
       if (!bodyLength) throw new createErrors.BadRequest('Request body empty!')
 
       const queryValueDatabase = [
-        data.buyer_id,
+        req?.userData?.id,
         data.product_id,
         data.quantity,
         data.price

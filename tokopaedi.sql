@@ -5,6 +5,8 @@ CREATE TABLE users (
 	password VARCHAR NOT NULL,
 	picture VARCHAR(100),
 	role TEXT NOT NULL DEFAULT 'buyer',
+	store TEXT DEFAULT NULL,
+	phone VARCHAR(15) DEFAULT NULL,
 	refresh_token TEXT DEFAULT '',
 	verification_code TEXT DEFAULT '',
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
